@@ -1,8 +1,8 @@
-# CRUD Users API — Node.js + PostgreSQL
+# CRUD Users API — Node.js, PostgreSQL & JWT
 
-API REST para gerenciamento de usuários (CRUD completo), desenvolvida com **Node.js**, **PostgreSQL** e **arquitetura em camadas (Controller / Service / Repository)**.
+API REST para gerenciamento de usuários (**CRUD completo**) desenvolvida com **Node.js**, **PostgreSQL** e **arquitetura em camadas (Controller / Service / Repository)**.
 
-Projeto criado com foco em **aprendizado**, **boas práticas** e **portfólio profissional**, incluindo validações, segurança de senhas e execução via Docker.
+O projeto inclui **validação de dados**, **hash de senha**, **login com JWT**, **rotas protegidas**, **Docker** e foi criado com foco em **aprendizado** e **portfólio profissional**.
 
 ---
 
@@ -13,6 +13,7 @@ Projeto criado com foco em **aprendizado**, **boas práticas** e **portfólio pr
 - **PostgreSQL**
 - **pg** (driver PostgreSQL)
 - **bcryptjs** (hash de senha)
+- **jsonwebtoken (JWT)** (autenticação)
 - **Zod** (validação de dados)
 - **Docker & Docker Compose**
 - **Git & GitHub**
@@ -21,20 +22,22 @@ Projeto criado com foco em **aprendizado**, **boas práticas** e **portfólio pr
 
 ## 🧱 Arquitetura do projeto
 
-O projeto utiliza **arquitetura em camadas**, separando responsabilidades para facilitar manutenção, testes e escalabilidade.
+O projeto segue **arquitetura em camadas**, separando responsabilidades para facilitar manutenção, testes e escalabilidade.
 
 ### Controller
 Responsável pela camada HTTP:
 - recebe `req`
 - chama o Service
 - retorna `res`
+- define status HTTP
 
-Não contém SQL nem regras de negócio complexas.
+Não contém SQL nem regra de negócio.
 
 ### Service
 Responsável pelas **regras de negócio**:
 - validações de regra (ex.: email duplicado)
-- uso de bcrypt para hash de senha
+- hash e comparação de senha
+- geração de JWT
 - decisões de fluxo
 
 ### Repository
@@ -49,193 +52,227 @@ Responsável pelo **acesso ao banco de dados**:
 
 ```txt
 src/
-  app.js
   server.js
-  config/
-    database.js
-  modules/
-    users/
-      controllers/
-        users.controller.js
-      repositories/
-        users.repository.js
-      routes/
-        users.routes.js
-      services/
-        create-user.service.js
-        list-users.service.js
-        get-user-by-id.service.js
-        update-user.service.js
-        delete-user.service.js
-        update-user-password.service.js
-      validation/
-        users.schemas.js
+  app.js
+
   shared/
+    validation/
+      users.schemas.js
+      validate.js
+    middlewares/
+      ensureAuthenticated.js
     errors/
       AppError.js
       asyncHandler.js
       errorHandler.js
-    validation/
-      validate.js
+    infra/
+      database/
+        database.js
+
+  modules/
+    users/
+      controllers/
+        users.controller.js
+        sessions.controller.js
+      repositories/
+        users.repository.js
+      services/
+        create-user.service.js
+        list-users-paginated.service.js
+        get-user-by-id.service.js
+        update-user.service.js
+        update-user-password.service.js
+        delete-user.service.js
+        login.service.js
+      routes/
+        users.routes.js
+        sessions.routes.js
+
 database/
   init.sql
+
 Dockerfile
 docker-compose.yml
 README.md
 ▶️ Como executar o projeto
 🔹 Opção 1 — Executar com Docker (recomendado)
-
 Pré-requisito: Docker Desktop instalado
 
-Na raiz do projeto, execute:
+Na raiz do projeto:
 
+bash
+Copy code
 docker compose up --build
-
-
 A API ficará disponível em:
 
+arduino
+Copy code
 http://localhost:3015
-
-
 Para parar os containers:
 
+bash
+Copy code
 docker compose down
+Para remover os dados do banco:
 
-
-Para remover os dados do banco (volume):
-
+bash
+Copy code
 docker compose down -v
-
 🔹 Opção 2 — Executar localmente (sem Docker)
-
 Pré-requisitos:
 
-Node.js instalado
+Node.js
 
-PostgreSQL instalado e rodando
+PostgreSQL
 
 1. Instalar dependências
+bash
+Copy code
 npm install
-
 2. Criar o arquivo .env
+env
+Copy code
 PORT=3015
+
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=crud_users_db
 
-3. Criar a tabela
+JWT_SECRET=supersecretjwtkey
+JWT_EXPIRES_IN=1d
+3. Criar tabela
+Use o script:
 
-Utilize o script SQL disponível em:
-
+txt
+Copy code
 database/init.sql
-
 4. Rodar em desenvolvimento
+bash
+Copy code
 npm run dev
+🔐 Autenticação (JWT)
+O login retorna um JWT
+
+O token deve ser enviado no header:
+
+makefile
+Copy code
+Authorization: Bearer SEU_TOKEN
+Rotas protegidas exigem token válido
 
 🔗 Endpoints da API
-
 Base URL:
 
+arduino
+Copy code
 http://localhost:3015
-
-➕ Criar usuário
-
+➕ Criar usuário (público)
 POST /users
 
-Body:
-
+json
+Copy code
 {
   "name": "Lucas",
-  "email": "lucas@test.com",
+  "email": "lucas@email.com",
   "password": "123456"
 }
+Resposta:
 
+201 Created
 
-Resposta (201):
+🔑 Login (gera JWT)
+POST /sessions
 
+json
+Copy code
 {
-  "id": 1,
-  "name": "Lucas",
-  "email": "lucas@test.com",
-  "created_at": "...",
-  "updated_at": "..."
+  "email": "lucas@email.com",
+  "password": "123456"
 }
+Resposta:
 
-📄 Listar usuários
-
+json
+Copy code
+{
+  "user": {
+    "id": 1,
+    "name": "Lucas",
+    "email": "lucas@email.com"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+📄 Listar usuários (protegido)
 GET /users
 
-Retorna lista de usuários
+Query params:
 
-Não retorna senha
+bash
+Copy code
+?page=1&limit=10
+Header:
 
-🔍 Buscar usuário por ID
+makefile
+Copy code
+Authorization: Bearer SEU_TOKEN
+Resposta:
 
+json
+Copy code
+{
+  "data": [ ... ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 25,
+    "totalPages": 3
+  }
+}
+🔍 Buscar usuário por ID (protegido)
 GET /users/:id
 
-200 — usuário encontrado
-
-404 — usuário não encontrado
-
-✏️ Atualizar usuário
-
-PUT /users/:id
-
-Body (exemplos):
-
-{ "name": "Novo Nome" }
-
-{ "email": "novo@email.com" }
-
-
-200 — atualizado
+200 — encontrado
 
 404 — não encontrado
 
-409 — email já em uso
+✏️ Atualizar usuário (protegido)
+PUT /users/:id
 
-🔐 Atualizar senha
-
+json
+Copy code
+{
+  "name": "Novo Nome"
+}
+🔐 Atualizar senha (protegido)
 PUT /users/:id/password
 
-Body:
-
+json
+Copy code
 {
   "password": "novaSenha123"
 }
-
-
-Senha armazenada com hash bcrypt
-
-200 — atualizado
-
-404 — não encontrado
-
-❌ Deletar usuário
-
+❌ Deletar usuário (protegido)
 DELETE /users/:id
 
-204 — deletado com sucesso
+204 — sucesso
 
 404 — não encontrado
 
-🛡️ Validações e tratamento de erros
+🛡️ Validação e segurança
+Validação de body, params e query com Zod
 
-Validação de dados com Zod
+Senhas armazenadas com hash bcrypt
+
+Autenticação com JWT
 
 Middleware global de erros
 
-Erros de regra tratados com AppError
-
-Senhas armazenadas com hash (bcryptjs)
+Não expõe senha em nenhuma resposta
 
 📄 Licença
-
 Projeto livre para fins de estudo, aprendizado e portfólio.
 
 👨‍💻 Autor
-
 Desenvolvido por Lucas
 Projeto focado em aprendizado de backend, arquitetura e boas práticas.
