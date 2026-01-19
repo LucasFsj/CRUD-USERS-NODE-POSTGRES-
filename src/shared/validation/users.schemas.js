@@ -12,6 +12,11 @@ const paginationQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
 });
+// validacao de usuarios
+const loginBodySchema = z.object({
+  email: z.string().trim().email({ message: "email must be valid" }),
+  password: z.string().min(6, { message: "password must be at least 6 characters" }),
+});
 
 // POST /users
 const createUserBodySchema = z.object({
@@ -41,4 +46,5 @@ module.exports = {
   updateUserBodySchema,
   updatePasswordBodySchema,
    paginationQuerySchema,
+   loginBodySchema,
 };
