@@ -1,33 +1,51 @@
-# CRUD Users API (Node.js + PostgreSQL)
+# CRUD Users API — Node.js + PostgreSQL
 
-API REST para gerenciamento de usuários (CRUD completo) com Node.js, PostgreSQL e arquitetura em camadas (Controller / Service / Repository).
-Projeto focado em aprendizado e portfólio, com boas práticas de organização, validação e segurança de senhas.
+API REST para gerenciamento de usuários (CRUD completo), desenvolvida com **Node.js**, **PostgreSQL** e **arquitetura em camadas (Controller / Service / Repository)**.
 
-## Stack
-- Node.js + Express
-- PostgreSQL
-- pg (driver PostgreSQL)
-- bcryptjs (hash de senha)
-- zod (validação de dados)
-- Docker + Docker Compose
+Projeto criado com foco em **aprendizado**, **boas práticas** e **portfólio profissional**, incluindo validações, segurança de senhas e execução via Docker.
 
-## Arquitetura (Controller / Service / Repository)
+---
+
+## 📌 Tecnologias utilizadas
+
+- **Node.js**
+- **Express**
+- **PostgreSQL**
+- **pg** (driver PostgreSQL)
+- **bcryptjs** (hash de senha)
+- **Zod** (validação de dados)
+- **Docker & Docker Compose**
+- **Git & GitHub**
+
+---
+
+## 🧱 Arquitetura do projeto
+
+O projeto utiliza **arquitetura em camadas**, separando responsabilidades para facilitar manutenção, testes e escalabilidade.
 
 ### Controller
-Responsável por lidar com HTTP: recebe `req`, chama o Service e retorna `res`.
-Não contém SQL e evita regra de negócio pesada.
+Responsável pela camada HTTP:
+- recebe `req`
+- chama o Service
+- retorna `res`
+
+Não contém SQL nem regras de negócio complexas.
 
 ### Service
-Contém regras de negócio e orquestração:
+Responsável pelas **regras de negócio**:
 - validações de regra (ex.: email duplicado)
-- decisões do fluxo
 - uso de bcrypt para hash de senha
+- decisões de fluxo
 
 ### Repository
-Responsável por acesso a dados (SQL) usando `pg`.
-Somente essa camada conversa com o banco.
+Responsável pelo **acesso ao banco de dados**:
+- contém apenas SQL
+- utiliza `pg`
+- não conhece HTTP nem regras de negócio
 
-## Estrutura de pastas
+---
+
+## 📂 Estrutura de pastas
 
 ```txt
 src/
@@ -50,6 +68,8 @@ src/
         update-user.service.js
         delete-user.service.js
         update-user-password.service.js
+      validation/
+        users.schemas.js
   shared/
     errors/
       AppError.js
@@ -57,83 +77,84 @@ src/
       errorHandler.js
     validation/
       validate.js
-      users.schemas.js
 database/
   init.sql
-docker-compose.yml
 Dockerfile
-Como rodar o projeto
-Opção 1: Rodar com Docker (recomendado)
-Pré-requisito: Docker Desktop instalado.
+docker-compose.yml
+README.md
+▶️ Como executar o projeto
+🔹 Opção 1 — Executar com Docker (recomendado)
 
-Na raiz do projeto:
+Pré-requisito: Docker Desktop instalado
 
-bash
-Copy code
+Na raiz do projeto, execute:
+
 docker compose up --build
+
+
 A API ficará disponível em:
 
 http://localhost:3015
 
-Para parar:
 
-bash
-Copy code
+Para parar os containers:
+
 docker compose down
-Para apagar os dados do banco (volume):
 
-bash
-Copy code
+
+Para remover os dados do banco (volume):
+
 docker compose down -v
-Opção 2: Rodar local (sem Docker)
+
+🔹 Opção 2 — Executar localmente (sem Docker)
+
 Pré-requisitos:
 
 Node.js instalado
 
 PostgreSQL instalado e rodando
 
-Instalar dependências:
-
-bash
-Copy code
+1. Instalar dependências
 npm install
-Criar o arquivo .env na raiz:
 
-env
-Copy code
+2. Criar o arquivo .env
 PORT=3015
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=crud_users_db
-Criar tabela (SQL):
-Use o arquivo database/init.sql.
 
-Rodar em desenvolvimento:
+3. Criar a tabela
 
-bash
-Copy code
+Utilize o script SQL disponível em:
+
+database/init.sql
+
+4. Rodar em desenvolvimento
 npm run dev
-Endpoints
-Base URL: http://localhost:3015
 
-Criar usuário
+🔗 Endpoints da API
+
+Base URL:
+
+http://localhost:3015
+
+➕ Criar usuário
+
 POST /users
 
 Body:
 
-json
-Copy code
 {
   "name": "Lucas",
   "email": "lucas@test.com",
   "password": "123456"
 }
+
+
 Resposta (201):
 
-json
-Copy code
 {
   "id": 1,
   "name": "Lucas",
@@ -141,75 +162,80 @@ Copy code
   "created_at": "...",
   "updated_at": "..."
 }
-Listar usuários
-GET /users
-Resposta (200): array de usuários (sem senha)
 
-Buscar usuário por ID
+📄 Listar usuários
+
+GET /users
+
+Retorna lista de usuários
+
+Não retorna senha
+
+🔍 Buscar usuário por ID
+
 GET /users/:id
 
-200 se existir
+200 — usuário encontrado
 
-404 se não existir
+404 — usuário não encontrado
 
-Atualizar usuário (name/email)
+✏️ Atualizar usuário
+
 PUT /users/:id
 
 Body (exemplos):
 
-json
-Copy code
 { "name": "Novo Nome" }
-json
-Copy code
+
 { "email": "novo@email.com" }
-200 se atualizar
 
-404 se não existir
 
-409 se email já estiver em uso
+200 — atualizado
 
-Atualizar senha
+404 — não encontrado
+
+409 — email já em uso
+
+🔐 Atualizar senha
+
 PUT /users/:id/password
 
 Body:
 
-json
-Copy code
-{ "password": "novaSenha123" }
-Senha é salva com hash (bcrypt)
+{
+  "password": "novaSenha123"
+}
 
-200 se atualizar
 
-404 se não existir
+Senha armazenada com hash bcrypt
 
-Deletar usuário
+200 — atualizado
+
+404 — não encontrado
+
+❌ Deletar usuário
+
 DELETE /users/:id
 
-204 se deletar
+204 — deletado com sucesso
 
-404 se não existir
+404 — não encontrado
 
-Validações e Erros
-Validação com Zod (body/params) retorna 400 com mensagem clara.
+🛡️ Validações e tratamento de erros
 
-Erros de regra de negócio usam AppError e são tratados pelo middleware global.
+Validação de dados com Zod
 
-Senhas são armazenadas como hash (bcryptjs).
+Middleware global de erros
 
-Licença
-Este projeto é livre para fins de estudo e portfólio.
+Erros de regra tratados com AppError
 
-yaml
-Copy code
+Senhas armazenadas com hash (bcryptjs)
 
----
+📄 Licença
 
-# 13.3) Commitar no GitHub (passo a passo)
-Na raiz do projeto:
+Projeto livre para fins de estudo, aprendizado e portfólio.
 
-```bash
-git status
-git add README.md
-git commit -m "docs: add complete README with setup and endpoints"
-git push
+👨‍💻 Autor
+
+Desenvolvido por Lucas
+Projeto focado em aprendizado de backend, arquitetura e boas práticas.
