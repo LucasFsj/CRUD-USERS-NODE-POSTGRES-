@@ -8,12 +8,17 @@ const {
   createUserBodySchema,
   updateUserBodySchema,
   updatePasswordBodySchema,
+   paginationQuerySchema,
 } = require("../../../shared/validation/users.schemas");
 
 const usersRoutes = Router();
 const usersController = new UsersController();
 
-usersRoutes.get("/", asyncHandler((req, res) => usersController.index(req, res)));
+usersRoutes.get(
+  "/",
+  validate({ querySchema: paginationQuerySchema }),
+  asyncHandler((req, res) => usersController.index(req, res))
+);
 
 usersRoutes.get(
   "/:id",

@@ -1,10 +1,11 @@
 const UsersRepository = require("../repositories/users.repository");
 const CreateUserService = require("../services/create-user.service");
-const ListUsersService = require("../services/list-users.service");
 const GetUserByIdService = require("../services/get-user-by-id.service");
 const UpdateUserService = require("../services/update-user.service");
 const DeleteUserService = require("../services/delete-user.service");
 const UpdateUserPasswordService = require("../services/update-user-password.service");
+const ListUsersPaginatedService = require("../services/list-users-paginated.service");
+
 
 class UsersController {
   async create(req, res) {
@@ -18,14 +19,16 @@ class UsersController {
     return res.status(201).json(user);
   }
 
-  async index(req, res) {
-    const usersRepository = new UsersRepository();
-    const listUsersService = new ListUsersService(usersRepository);
+async index(req, res) {
+  const { page, limit } = req.query;
 
-    const users = await listUsersService.execute();
+  const usersRepository = new UsersRepository();
+  const listUsersService = new ListUsersPaginatedService(usersRepository);
 
-    return res.status(200).json(users);
-  }
+  const result = await listUsersService.execute({ page, limit });
+
+  return res.status(200).json(result);
+}
 
   async show(req, res) {
     const { id } = req.params;

@@ -7,6 +7,12 @@ const userIdParamsSchema = z.object({
   }),
 });
 
+// GET /users (pagination)
+const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});
+
 // POST /users
 const createUserBodySchema = z.object({
   name: z.string().trim().min(1, { message: "name is required" }),
@@ -34,4 +40,5 @@ module.exports = {
   createUserBodySchema,
   updateUserBodySchema,
   updatePasswordBodySchema,
+   paginationQuerySchema,
 };

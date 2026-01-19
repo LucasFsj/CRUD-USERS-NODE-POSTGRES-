@@ -1,6 +1,29 @@
 const pool = require("../../../config/database");
 
 class UsersRepository {
+  
+  //Adicionando metodo paginado
+  async findAllPaginated({ page, limit }) {
+  const offset = (page - 1) * limit;
+
+  const dataQuery = `
+    SELECT id, name, email, created_at, updated_at
+    FROM users
+    ORDER BY id DESC
+    LIMIT $1 OFFSET $2
+  `;
+
+  const countQuery = `SELECT COUNT(*) FROM users`;
+
+  const [dataResult, countResult] = await Promise.all([
+    pool.query(dataQuery, [limit, offset]),
+    pool.query(countQuery),
+  ]);
+
+  const total = Number(countResult.rows[0].count);
+
+  return { users: dataResult.rows, total };
+}
 
   //Atualizar o password
   async updatePassword(id, passwordHash) {
