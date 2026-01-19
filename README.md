@@ -50,7 +50,6 @@ Responsável pelo **acesso ao banco de dados**:
 
 ## 📂 Estrutura de pastas
 
-```txt
 src/
   server.js
   app.js
@@ -94,44 +93,35 @@ database/
 Dockerfile
 docker-compose.yml
 README.md
+
+ -  /  -
+   
 ▶️ Como executar o projeto
 🔹 Opção 1 — Executar com Docker (recomendado)
 Pré-requisito: Docker Desktop instalado
 
 Na raiz do projeto:
 
-bash
-Copy code
 docker compose up --build
 A API ficará disponível em:
-
-arduino
-Copy code
 http://localhost:3015
+
 Para parar os containers:
 
-bash
-Copy code
 docker compose down
 Para remover os dados do banco:
-
-bash
-Copy code
 docker compose down -v
+
 🔹 Opção 2 — Executar localmente (sem Docker)
+
 Pré-requisitos:
-
 Node.js
-
 PostgreSQL
 
-1. Instalar dependências
-bash
-Copy code
+1. Instalar dependências:
 npm install
 2. Criar o arquivo .env
-env
-Copy code
+
 PORT=3015
 
 DB_HOST=localhost
@@ -142,37 +132,38 @@ DB_NAME=crud_users_db
 
 JWT_SECRET=supersecretjwtkey
 JWT_EXPIRES_IN=1d
-3. Criar tabela
-Use o script:
 
-txt
-Copy code
+3. Criar tabela
+
+Use o script:
 database/init.sql
-4. Rodar em desenvolvimento
-bash
-Copy code
+
+5. Rodar em desenvolvimento:
 npm run dev
+
+6.Testes
+Os testes usam Jest + Supertest e fazem reset da tabela users entre casos.
+Recomenda-se usar um banco de teste separado.
+
+(Opcional) Crie .env.test com as credenciais do banco de testes.
+
+Executar testes:
+npm test
+
+
 🔐 Autenticação (JWT)
 O login retorna um JWT
 
 O token deve ser enviado no header:
-
-makefile
-Copy code
 Authorization: Bearer SEU_TOKEN
 Rotas protegidas exigem token válido
 
 🔗 Endpoints da API
-Base URL:
 
-arduino
-Copy code
+Base URL:
 http://localhost:3015
 ➕ Criar usuário (público)
 POST /users
-
-json
-Copy code
 {
   "name": "Lucas",
   "email": "lucas@email.com",
@@ -185,8 +176,6 @@ Resposta:
 🔑 Login (gera JWT)
 POST /sessions
 
-json
-Copy code
 {
   "email": "lucas@email.com",
   "password": "123456"
@@ -206,20 +195,14 @@ Copy code
 📄 Listar usuários (protegido)
 GET /users
 
+
 Query params:
-
-bash
-Copy code
 ?page=1&limit=10
+
 Header:
-
-makefile
-Copy code
 Authorization: Bearer SEU_TOKEN
-Resposta:
 
-json
-Copy code
+Resposta:
 {
   "data": [ ... ],
   "meta": {
@@ -229,6 +212,7 @@ Copy code
     "totalPages": 3
   }
 }
+
 🔍 Buscar usuário por ID (protegido)
 GET /users/:id
 
@@ -237,26 +221,21 @@ GET /users/:id
 404 — não encontrado
 
 ✏️ Atualizar usuário (protegido)
-PUT /users/:id
 
-json
-Copy code
+PUT /users/:id
 {
   "name": "Novo Nome"
 }
+
 🔐 Atualizar senha (protegido)
 PUT /users/:id/password
-
-json
-Copy code
 {
   "password": "novaSenha123"
 }
-❌ Deletar usuário (protegido)
+❌ Deletar usuário (protegido):
+
 DELETE /users/:id
-
 204 — sucesso
-
 404 — não encontrado
 
 🛡️ Validação e segurança
