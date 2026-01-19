@@ -1,55 +1,72 @@
 # CRUD Users API — Node.js, PostgreSQL & JWT
 
-API REST para gerenciamento de usuários (**CRUD completo**) desenvolvida com **Node.js**, **PostgreSQL** e **arquitetura em camadas (Controller / Service / Repository)**.
+API REST para **gerenciamento de usuários (CRUD completo)** desenvolvida com **Node.js**, **PostgreSQL** e **arquitetura em camadas (Controller / Service / Repository)**.
 
-O projeto inclui **validação de dados**, **hash de senha**, **login com JWT**, **rotas protegidas**, **Docker** e foi criado com foco em **aprendizado** e **portfólio profissional**.
-
----
-
-## 📌 Tecnologias utilizadas
-
-- **Node.js**
-- **Express**
-- **PostgreSQL**
-- **pg** (driver PostgreSQL)
-- **bcryptjs** (hash de senha)
-- **jsonwebtoken (JWT)** (autenticação)
-- **Zod** (validação de dados)
-- **Docker & Docker Compose**
-- **Git & GitHub**
+O projeto inclui **validação de dados**, **hash de senha**, **autenticação com JWT**, **rotas protegidas**, **testes automatizados** e **Docker**, sendo construído com foco em **aprendizado**, **boas práticas de backend** e **portfólio profissional**.
 
 ---
 
-## 🧱 Arquitetura do projeto
+## 🎯 Objetivo do Projeto
 
-O projeto segue **arquitetura em camadas**, separando responsabilidades para facilitar manutenção, testes e escalabilidade.
+- Consolidar conceitos de CRUD e REST API
+- Aplicar arquitetura em camadas
+- Trabalhar autenticação e autorização com JWT
+- Garantir segurança básica (hash de senha, validação)
+- Utilizar Docker para padronizar o ambiente
+- Criar uma base sólida para projetos backend maiores
 
-### Controller
+---
+
+## 🧰 Tecnologias Utilizadas
+
+- Node.js
+- Express
+- PostgreSQL
+- pg (driver PostgreSQL)
+- bcryptjs (hash de senha)
+- jsonwebtoken (JWT)
+- Zod (validação de dados)
+- Jest + Supertest (testes automatizados)
+- Docker & Docker Compose
+- Git & GitHub
+
+---
+
+## 🏗️ Arquitetura do Projeto
+
+O projeto segue **arquitetura em camadas**, separando responsabilidades para facilitar **manutenção**, **testes** e **escalabilidade**.
+
+### 📦 Controller
 Responsável pela camada HTTP:
-- recebe `req`
-- chama o Service
-- retorna `res`
-- define status HTTP
+- Recebe `req`
+- Chama o Service
+- Retorna `res`
+- Define status HTTP
 
-Não contém SQL nem regra de negócio.
-
-### Service
-Responsável pelas **regras de negócio**:
-- validações de regra (ex.: email duplicado)
-- hash e comparação de senha
-- geração de JWT
-- decisões de fluxo
-
-### Repository
-Responsável pelo **acesso ao banco de dados**:
-- contém apenas SQL
-- utiliza `pg`
-- não conhece HTTP nem regras de negócio
+> Não contém SQL nem regras de negócio.
 
 ---
 
-## 📂 Estrutura de pastas
+### 🧠 Service
+Responsável pelas regras de negócio:
+- Validações de regra (ex: email duplicado)
+- Hash e comparação de senha
+- Geração de JWT
+- Decisões de fluxo
 
+---
+
+### 🗄️ Repository
+Responsável pelo acesso ao banco de dados:
+- Contém apenas SQL
+- Utiliza `pg`
+- Não conhece HTTP nem regras de negócio
+
+---
+
+## 📁 Estrutura de Pastas
+
+```txt
 src/
   server.js
   app.js
@@ -64,9 +81,6 @@ src/
       AppError.js
       asyncHandler.js
       errorHandler.js
-    infra/
-      database/
-        database.js
 
   modules/
     users/
@@ -90,38 +104,41 @@ src/
 database/
   init.sql
 
+tests/
+  setup.js
+  users.e2e.test.js
+
+jest.config.js
 Dockerfile
 docker-compose.yml
 README.md
 
- -  /  -
-   
-▶️ Como executar o projeto
+🚀 Como Executar o Projeto
 🔹 Opção 1 — Executar com Docker (recomendado)
+
 Pré-requisito: Docker Desktop instalado
 
 Na raiz do projeto:
-
 docker compose up --build
+
 A API ficará disponível em:
 http://localhost:3015
 
-Para parar os containers:
-
+Parar os containers:
 docker compose down
-Para remover os dados do banco:
+
+Remover volumes (dados do banco):
 docker compose down -v
 
-🔹 Opção 2 — Executar localmente (sem Docker)
+Opção 2 — Executar localmente (sem Docker)
 
 Pré-requisitos:
 Node.js
 PostgreSQL
 
-1. Instalar dependências:
-npm install
-2. Criar o arquivo .env
+Instalar dependências: npm install
 
+Criar o arquivo .env:
 PORT=3015
 
 DB_HOST=localhost
@@ -133,35 +150,27 @@ DB_NAME=crud_users_db
 JWT_SECRET=supersecretjwtkey
 JWT_EXPIRES_IN=1d
 
-3. Criar tabela
+Criar as tabelas
+Utilize o script: database/init.sql
 
-Use o script:
-database/init.sql
+Rodar em desenvolvimento: npm run dev
 
-5. Rodar em desenvolvimento:
-npm run dev
+🧪 Testes Automatizados
 
-6.Testes
-Os testes usam Jest + Supertest e fazem reset da tabela users entre casos.
-Recomenda-se usar um banco de teste separado.
-
-(Opcional) Crie .env.test com as credenciais do banco de testes.
-
-Executar testes:
-npm test
-
+Testes E2E com Jest + Supertest
+Reset da tabela users entre os testes
+Recomenda-se banco de dados exclusivo para testes
+(Opcional) Crie um .env.test com credenciais do banco de testes.
+Executar testes: npm test
 
 🔐 Autenticação (JWT)
-O login retorna um JWT
+O login retorna um JWT.
+O token deve ser enviado no header: Authorization: Bearer SEU_TOKEN
+Rotas protegidas exigem token válido.
 
-O token deve ser enviado no header:
-Authorization: Bearer SEU_TOKEN
-Rotas protegidas exigem token válido
+🌐 Endpoints da API
+Base URL:"http://localhost:3015
 
-🔗 Endpoints da API
-
-Base URL:
-http://localhost:3015
 ➕ Criar usuário (público)
 POST /users
 {
@@ -169,21 +178,15 @@ POST /users
   "email": "lucas@email.com",
   "password": "123456"
 }
-Resposta:
-
-201 Created
+Resposta: 201 Created
 
 🔑 Login (gera JWT)
 POST /sessions
-
 {
   "email": "lucas@email.com",
   "password": "123456"
 }
 Resposta:
-
-json
-Copy code
 {
   "user": {
     "id": 1,
@@ -192,19 +195,15 @@ Copy code
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
+
 📄 Listar usuários (protegido)
 GET /users
-
-
-Query params:
-?page=1&limit=10
-
-Header:
-Authorization: Bearer SEU_TOKEN
+Query params: ?page=1&limit=10
+Header: Authorization: Bearer SEU_TOKEN
 
 Resposta:
 {
-  "data": [ ... ],
+  "data": [],
   "meta": {
     "page": 1,
     "limit": 10,
@@ -215,43 +214,40 @@ Resposta:
 
 🔍 Buscar usuário por ID (protegido)
 GET /users/:id
-
 200 — encontrado
-
 404 — não encontrado
 
 ✏️ Atualizar usuário (protegido)
-
 PUT /users/:id
 {
   "name": "Novo Nome"
 }
-
-🔐 Atualizar senha (protegido)
+🔒 Atualizar senha (protegido)
 PUT /users/:id/password
 {
   "password": "novaSenha123"
 }
-❌ Deletar usuário (protegido):
+🗑️ Deletar usuário (protegido)
 
 DELETE /users/:id
+
 204 — sucesso
+
 404 — não encontrado
 
-🛡️ Validação e segurança
+🛡️ Validação e Segurança
 Validação de body, params e query com Zod
-
 Senhas armazenadas com hash bcrypt
-
-Autenticação com JWT
-
+Autenticação via JWT
 Middleware global de erros
-
-Não expõe senha em nenhuma resposta
+Nenhuma resposta expõe senha
 
 📄 Licença
 Projeto livre para fins de estudo, aprendizado e portfólio.
-
 👨‍💻 Autor
-Desenvolvido por Lucas
-Projeto focado em aprendizado de backend, arquitetura e boas práticas.
+Lucas Felipe Silva Jorge
+Projeto focado em aprendizado de backend, arquitetura em camadas e boas práticas.
+
+
+
+
